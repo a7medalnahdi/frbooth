@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ملف الشركة – Sweater Company Profile Viewer</title>
+    <meta name="color-scheme" content="light" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23f26822'/%3E%3Ctext x='50' y='60' text-anchor='middle' font-size='54' fill='white' font-family='Arial, Helvetica, sans-serif'%3ES%3C/text%3E%3C/svg%3E" />
+    <style>
+        :root {
+            --primary: #f26822;
+            --primary-600: #e05f1f;
+            --secondary: #477fc1;
+            --page-bg: #ffffff;
+            --text: #222222;
+            --muted: #f3f4f6;
+            --border: #e5e7eb;
+            --shadow: 0 10px 25px rgba(0,0,0,.08);
+        }
+        html, body {
+            height: 100%;
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--page-bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            padding: 0 1rem;
+            box-sizing: border-box;
+        }
+        .header {
+            width: 100%;
+            padding: 20px 0;
+            text-align: center;
+        }
+        .logo {
+            max-width: 150px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            filter: drop-shadow(0 2px 8px rgba(0,0,0,.18));
+        }
+        .brand {
+            font-weight: 800;
+            letter-spacing: .3px;
+            color: #fff;
+            font-size: clamp(16px, 2vw, 18px);
+        }
+        .toolbar {
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 14px;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            background: var(--muted);
+            border-radius: 14px;
+            box-shadow: var(--shadow);
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 10px;
+            box-sizing: border-box;
+        }
+        .tool-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+        .spacer {
+            justify-self: center;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border);
+            background: #fff;
+            color: var(--text);
+            padding: 10px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: .2s ease;
+            font-weight: 600;
+            user-select: none;
+            backdrop-filter: blur(4px);
+        }
+        .btn:hover {
+            background: #f5f5f5;
+        }
+        .btn.primary {
+            background: var(--primary);
+            color: #fff;
+            border-color: transparent;
+        }
+        .btn.primary:hover {
+            background: var(--primary-600);
+        }
+        .toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+        }
+        .switch {
+            position: relative;
+            width: 62px;
+            height: 34px;
+            display: inline-block;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            inset: 0;
+            background: #c7c7c7;
+            border-radius: 34px;
+            transition: .25s;
+        }
+        .slider::before {
+            content: "";
+            position: absolute;
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            top: 4px;
+            background: #fff;
+            border-radius: 50%;
+            transition: .25s;
+            box-shadow: 0 1px 3px rgba(0,0,0,.25);
+        }
+        .switch input:checked + .slider {
+            background: var(--secondary);
+        }
+        .switch input:checked + .slider::before {
+            transform: translateX(28px);
+        }
+        .viewer {
+            width: 95vw;
+            max-width: 1200px;
+            flex-grow: 1; /* New: allows viewer to fill remaining space */
+            background: var(--muted);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: var(--shadow);
+            margin-bottom: 1rem;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            display: block;
+            background: #fff;
+        }
+        .loader {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(180deg, #00000010, #00000008);
+            pointer-events: none;
+        }
+        .ring {
+            width: 52px;
+            height: 52px;
+            border: 4px solid #ccc;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .infobar {
+            position: absolute;
+            right: 12px;
+            bottom: 12px;
+            background: #00000085;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 12px;
+            display: none;
+        }
+        .footer {
+            max-width: 1200px;
+            width: 100%;
+            margin: 12px auto 22px;
+            opacity: .75;
+            font-size: 12px;
+            text-align: center;
+        }
+        .hide {
+            display: none !important;
+        }
+        .kbd {
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            background: #00000010;
+            padding: 2px 6px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+        @media (max-width: 640px) {
+            .toolbar {
+                grid-template-columns: 1fr;
+            }
+            .viewer {
+                height: 100%;
+            }
+            .brand {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app" dir="rtl" style="display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; padding: 0;">
+        <header class="header" role="banner">
+            <img src="Logo-2.png" alt="شعار سويتر" class="logo" />
+        </header>
+        <section class="toolbar" aria-label="شريط الأدوات">
+            <div class="tool-group" role="group" aria-label="لغة واتجاه">
+                <span aria-hidden="true">عربي</span>
+                <label class="switch" aria-label="تبديل اللغة" title="بدّل بين العربية والإنجليزية">
+                    <input type="checkbox" id="lang-toggle" aria-checked="false" />
+                    <span class="slider" aria-hidden="true"></span>
+                </label>
+                <span aria-hidden="true">English</span>
+            </div>
+            <div class="tool-group spacer" role="group" aria-label="عرض">
+                <button class="btn" id="zoomOut" type="button" title="تصغير" aria-label="تصغير">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7 11h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    <span>–</span>
+                </button>
+                <button class="btn" id="zoomReset" type="button" title="إعادة" aria-label="إعادة التكبير">100%</button>
+                <button class="btn" id="zoomIn" type="button" title="تكبير" aria-label="تكبير">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M11 7v8M7 11h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    <span>+</span>
+                </button>
+            </div>
+            <div class="tool-group" role="group" aria-label="إجراءات">
+                <button class="btn" id="openNew" type="button" title="فتح في تبويب جديد" aria-label="فتح في تبويب جديد">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M14 3h7v7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M10 14L21 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M21 14v7h-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M3 10V3h7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    <span>فتح</span>
+                </button>
+                <button class="btn primary" id="downloadBtn" type="button" title="تنزيل" aria-label="تنزيل الملف">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 3v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="4" y="18" width="16" height="3" rx="1.5" fill="currentColor"/></svg>
+                    <span>تنزيل</span>
+                </button>
+                <button class="btn primary" id="fsBtn" type="button" title="وضع ملء الشاشة" aria-label="ملء الشاشة">ملء الشاشة</button>
+            </div>
+        </section>
+        <main class="viewer" id="viewer" role="main">
+            <div class="loader" id="loader" aria-hidden="true"><div class="ring" role="status" aria-label="جاري التحميل"></div></div>
+            <iframe id="pdfFrame" title="عارض ملف PDF"></iframe>
+            <div id="info" class="infobar" role="status"></div>
+        </main>
+        <footer class="footer">
+            اختصارات لوحة المفاتيح: <span class="kbd">L</span> تبديل اللغة • <span class="kbd">+</span>/<span class="kbd">-</span> تكبير/تصغير • <span class="kbd">F</span> ملء الشاشة
+        </footer>
+    </div>
+    <script>
+        (function(){
+            const FILES = { ar: 'arabic-file.pdf', en: 'english-file.pdf' };
+            const app = document.getElementById('app');
+            const pdfFrame = document.getElementById('pdfFrame');
+            const langToggle = document.getElementById('lang-toggle');
+            const loader = document.getElementById('loader');
+            const infobar = document.getElementById('info');
+            const fsBtn = document.getElementById('fsBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const openNew = document.getElementById('openNew');
+            const zoomOut = document.getElementById('zoomOut');
+            const zoomIn = document.getElementById('zoomIn');
+            const zoomReset = document.getElementById('zoomReset');
+            const viewer = document.getElementById('viewer');
+            let currentLang = 'ar';
+            let zoom = parseInt(localStorage.getItem('sweater_zoom') || '100', 10);
+            const setAttr = (lang) => {
+                const lcode = lang === 'ar' ? 'ar' : 'en';
+                document.documentElement.lang = lcode;
+                document.title = lang === 'ar' ? 'ملف الشركة – سويتر' : 'Sweater – Company Profile';
+            };
+            const srcWithZoom = (base) => {
+                const hash = `#zoom=${zoom}`;
+                return base.includes('#') ? base.replace(/#.*$/, hash) : (base + hash);
+            };
+            const loadPDF = (lang) => {
+                currentLang = lang;
+                setAttr(lang);
+                const file = FILES[lang];
+                loader.classList.remove('hide');
+                pdfFrame.src = srcWithZoom(file);
+                localStorage.setItem('sweater_lang', lang);
+                langToggle.checked = (lang === 'en');
+                langToggle.setAttribute('aria-checked', String(lang === 'en'));
+                showInfo(lang === 'ar' ? 'تم تحميل النسخة العربية' : 'English file loaded');
+            };
+            const showInfo = (msg) => {
+                infobar.textContent = msg; infobar.style.display = 'block';
+                clearTimeout(showInfo._t);
+                showInfo._t = setTimeout(()=>{ infobar.style.display='none'; }, 2200);
+            };
+            pdfFrame.addEventListener('load', ()=>{ loader.classList.add('hide'); });
+            setTimeout(()=>{
+                if (!pdfFrame.contentWindow) {
+                    loader.classList.add('hide');
+                    showInfo(currentLang==='ar'?'تعذّر تحميل المعاينة. استخدم زر فتح.':'Preview blocked. Use Open.');
+                }
+            }, 4000);
+            langToggle.addEventListener('change', (e)=>{
+                const toEn = e.target.checked; loadPDF(toEn ? 'en' : 'ar');
+            });
+            openNew.addEventListener('click', ()=>{
+                const file = FILES[currentLang];
+                window.open(srcWithZoom(file), '_blank', 'noopener');
+            });
+            downloadBtn.addEventListener('click', ()=>{
+                const a = document.createElement('a');
+                a.href = FILES[currentLang];
+                a.download = currentLang==='ar' ? 'ملف-الشركة-سويتر.pdf' : 'Sweater-Company-Profile.pdf';
+                document.body.appendChild(a); a.click(); a.remove();
+            });
+            fsBtn.addEventListener('click', async ()=>{
+                try {
+                    if (!document.fullscreenElement) {
+                        await viewer.requestFullscreen();
+                        fsBtn.textContent = currentLang==='ar'?'الخروج من ملء الشاشة':'Exit Fullscreen';
+                    } else {
+                        await document.exitFullscreen();
+                        fsBtn.textContent = currentLang==='ar'?'ملء الشاشة':'Fullscreen';
+                    }
+                } catch(e) { showInfo('Fullscreen not available'); }
+            });
+            document.addEventListener('fullscreenchange', ()=>{
+                fsBtn.textContent = document.fullscreenElement ? (currentLang==='ar'?'الخروج من ملء الشاشة':'Exit Fullscreen') : (currentLang==='ar'?'ملء الشاشة':'Fullscreen');
+            });
+            const applyZoom = () => {
+                zoom = Math.max(50, Math.min(300, zoom));
+                localStorage.setItem('sweater_zoom', String(zoom));
+                const base = FILES[currentLang];
+                const cur = pdfFrame.src.split('#')[0];
+                const baseName = base.split('#')[0];
+                if (!cur.endsWith(baseName)) {
+                    pdfFrame.src = srcWithZoom(base);
+                } else {
+                    pdfFrame.src = srcWithZoom(cur);
+                }
+                zoomReset.textContent = zoom + '%';
+            };
+            zoomIn.addEventListener('click', ()=>{ zoom += 10; applyZoom(); });
+            zoomOut.addEventListener('click', ()=>{ zoom -= 10; applyZoom(); });
+            zoomReset.addEventListener('click', ()=>{ zoom = 100; applyZoom(); });
+            document.addEventListener('keydown', (e)=>{
+                if (['INPUT','TEXTAREA'].includes(e.target.tagName)) return;
+                if (e.key === 'l' || e.key === 'L') { langToggle.checked = !langToggle.checked; langToggle.dispatchEvent(new Event('change')); }
+                if (e.key === '+') { zoom += 10; applyZoom(); }
+                if (e.key === '-') { zoom -= 10; applyZoom(); }
+                if (e.key === 'f' || e.key === 'F') { fsBtn.click(); }
+            });
+            (function init(){
+                const params = new URLSearchParams(location.search);
+                const urlLang = (params.get('lang')||'').toLowerCase();
+                const saved = localStorage.getItem('sweater_lang');
+                const initial = (urlLang==='en'||urlLang==='ar') ? urlLang : (saved||'ar');
+                zoomReset.textContent = zoom + '%';
+                loadPDF(initial);
+            })();
+        })();
+    </script>
+</body>
+</html>
